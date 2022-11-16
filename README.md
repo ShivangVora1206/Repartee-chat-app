@@ -1,0 +1,2 @@
+# Repartee-chat-app
+For users who prefer to conduct discussions in their private spaces, there is an application called Repartee. With a dependable socket.io connection, users may send and receive messages, and all of their crucial chats are securely kept on a mongoDB database. New users can set up a profile with their preferred display image and begin communicating with the groups they belong to. Users can have a seamless experience without having to log in each time thanks to a persistent authorization mechanism.
