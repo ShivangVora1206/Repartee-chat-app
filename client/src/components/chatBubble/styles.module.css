@@ -37,6 +37,21 @@
 
 }
 
+/* ul:hover .containerme{
+    filter: blur(5px);
+}
+
+ul .containerme:hover{
+    filter: blur(0px);
+}
+ul:hover .container{
+    filter: blur(5px);
+}
+
+ul .container:hover{
+    filter: blur(0px);
+} */
+
 .containerme:hover{
     /* filter: blur(); */
     filter: brightness(1.2);

@@ -4,7 +4,8 @@ import ChatBubble from "../chatBubble/chatBubble"
 import styles from "./styles.module.css"
 import moment from "moment"
 import InfiniteScroll from 'react-infinite-scroller';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBars } from '@fortawesome/free-solid-svg-icons'
 let data = [
     {
         id : "id",
@@ -267,6 +268,8 @@ useEffect(() => {
                 <img src={"http://127.0.0.1:8000/"+props.groupprofile}/>
                 <h2 className={styles["heading-2-unread"]}>{props.groupname}</h2>
                 </div>
+                <FontAwesomeIcon onClick={() => {props.setAddToGroupPopup(true)}} icon={faBars} style={{color:"white"}} />
+
             </nav>
             <div className={styles.chatbody} ref={messageEl}>
             <InfiniteScroll
@@ -291,6 +294,7 @@ useEffect(() => {
                 </InfiniteScroll>
             </div>
             <div className={styles.messageInputDiv}>
+                
                 <input onKeyUp={onKeyUpHandler} onChange={changeInputVal} value={messageInput} className={styles.messageInput} placeholder="Type a message"></input>
             </div>
         </div>
