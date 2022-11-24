@@ -6,6 +6,7 @@ import moment from "moment"
 import InfiniteScroll from 'react-infinite-scroller';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
+import {Buffer} from 'buffer';
 let data = [
     {
         id : "id",
@@ -111,6 +112,12 @@ export default function ChatPreview(props) {
     const [chatsArray, setChatsArray] = useState([]);
     const [pagenum, setPagenum] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+    const [file, setFile] = useState(null);
+    const [image, setImage] = useState();
+    if (file){
+
+        console.log("file", file.arrayBuffer());
+    }
     console.log("gname", props.groupname);
     console.log("page",pagenum, hasMore);
     const url = `http://127.0.0.1:8000/getconversation/?count=${pagenum}`;
@@ -180,6 +187,15 @@ useEffect(() => {
         })
     }, [])
 
+    useEffect(()=>{
+        props.socket.on("image", m=>{
+            console.log(m);
+            const b64 = Buffer(m).toString('base64');
+            console.log(b64);
+            setImage(b64);
+        })
+    }, [])
+
     function saveConversationToDb(chatbody){
         const url = "http://127.0.0.1:8000/addconversation";
         const options = {
@@ -234,7 +250,14 @@ useEffect(() => {
         setMessageInput(e.target.value);
     }
 
+    useEffect(()=>{
+        props.socket.emit("image", {image:true, buffer:file});
+    }, [file])
 
+    function fileChange(e){
+        setFile(e.target.files[0])
+        
+    }
 
 
     function onKeyUpHandler(e) {
@@ -264,6 +287,7 @@ useEffect(() => {
     return (
         <div className={styles.container}>
             <nav className={styles.navbar}>
+                <img src={`data:image/png;base64,${image}`} alt=""/>
                 <div className={styles.profilename}>
                 <img src={"http://127.0.0.1:8000/"+props.groupprofile}/>
                 <h2 className={styles["heading-2-unread"]}>{props.groupname}</h2>
@@ -294,7 +318,7 @@ useEffect(() => {
                 </InfiniteScroll>
             </div>
             <div className={styles.messageInputDiv}>
-                
+                <input type="file" onChange={fileChange}></input>
                 <input onKeyUp={onKeyUpHandler} onChange={changeInputVal} value={messageInput} className={styles.messageInput} placeholder="Type a message"></input>
             </div>
         </div>

@@ -63,6 +63,18 @@ io.on("connection", socket => {
         socket.join(m);
         console.log("Joined ", m);
     })
+
+    socket.on("image", m =>{
+        console.log("buffer", m);
+        if(m.buffer){
+
+            socket.emit("image", m.buffer);
+            console.log("Emitted buffer");
+        }
+        // const mimeType = 'image/png';
+
+        
+    })
 })
 
 app.get("/adduser", (req, res)=>{
