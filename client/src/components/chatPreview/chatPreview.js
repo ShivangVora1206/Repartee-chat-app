@@ -236,6 +236,7 @@ useEffect(() => {
                     message : messageData,
                     groupid : props.groupid,
                     type : "image",
+                    fileName : file.name,
                     mimeType : file.type,
                     body : Buffer(buffer).toString('base64'),
                     timestamp : moment()._d.toLocaleString(),

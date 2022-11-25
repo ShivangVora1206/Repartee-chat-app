@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
-
+// const dotenv = require('dotenv');
+// dotenv.config();
 module.exports = function (){
-    mongoose.connect("mongodb+srv://todo-app:todo-app1@cluster0.l15a2yt.mongodb.net/discussionApp?retryWrites=true&w=majority")
+    mongoose.connect(process.env.MONGO_URI)
 .then(()=>{
     console.log("connected to db");
 }).catch((e)=>{

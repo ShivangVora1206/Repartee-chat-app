@@ -2,6 +2,9 @@ const express = require("express")
 const cors = require("cors");
 const moment = require('moment');
 const multer = require('multer');
+const dotenv = require('dotenv');
+dotenv.config({ path: '../.env' });
+// dotenv.config();
 app = express()
 const http = require("http");
 const {Server} = require("socket.io");
@@ -69,7 +72,6 @@ io.on("connection", socket => {
     })
 
     socket.on("image", m =>{
-        // console.log("buffer", m);
         let res = JSON.parse(m);
         if(res.body){
             let group = res.groupid;
