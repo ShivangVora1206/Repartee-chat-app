@@ -13,11 +13,15 @@ const groupModel = require("./database/groupModel");
 const conversationModel = require("./database/conversationModel");
 const e = require("express");
 const server = http.createServer(app);
-const io = new Server(server,{
-    cors:{origin:"http://127.0.0.1:3000", methods:["GET", "POST"],
-            origin:"http://localhost:3000", methods:['GET', 'POST']},
-    
-})
+const io = new Server(server, {
+	cors: {
+		origin: "http://127.0.0.1:3000",
+		methods: ["GET", "POST"],
+		origin: "http://localhost:3000",
+		methods: ["GET", "POST"],
+	},
+    maxHttpBufferSize: 1e8
+});
 startDB();
 app.use(cors());
 app.use(express.static("public"));
@@ -65,10 +69,11 @@ io.on("connection", socket => {
     })
 
     socket.on("image", m =>{
-        console.log("buffer", m);
-        if(m.buffer){
-
-            socket.emit("image", m.buffer);
+        // console.log("buffer", m);
+        let res = JSON.parse(m);
+        if(res.body){
+            let group = res.groupid;
+            socket.broadcast.to(group).emit("image", res);
             console.log("Emitted buffer");
         }
         // const mimeType = 'image/png';
@@ -176,7 +181,7 @@ app.post("/login", async (req, res)=>{
     console.log(req.body);
     let data = await userModel.find({username:req.body.username, password:req.body.password})
     if(data.length){
-        res.cookie("sid", "0000");
+        // res.cookie("sid", "0000");
         res.json({status:200});
     }else{
         res.json({status:404});

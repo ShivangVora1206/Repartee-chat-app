@@ -66,3 +66,8 @@ img{
     display: flex;
     align-items: center;
 }
+.imageButton{
+
+    font-size: 01;
+    color: white;
+} 

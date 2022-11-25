@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { Socket } from "socket.io-client";
 import ChatBubble from "../chatBubble/chatBubble"
 import styles from "./styles.module.css"
 import moment from "moment"
@@ -113,10 +112,13 @@ export default function ChatPreview(props) {
     const [pagenum, setPagenum] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [file, setFile] = useState(null);
+    const [fileName, setFileName] = useState("");
     const [image, setImage] = useState();
     if (file){
 
-        console.log("file", file.arrayBuffer());
+        console.log("file", file.arrayBuffer().then((data)=>{
+            console.log("data", data);
+        }));
     }
     console.log("gname", props.groupname);
     console.log("page",pagenum, hasMore);
@@ -186,13 +188,13 @@ useEffect(() => {
             console.log("append called from socket");
         })
     }, [])
-
+    
     useEffect(()=>{
         props.socket.on("image", m=>{
             console.log(m);
-            const b64 = Buffer(m).toString('base64');
-            console.log(b64);
-            setImage(b64);
+            // let body = JSON.parse(m);
+            console.log("image append called from socket");
+            appendNewChat(m, false);
         })
     }, [])
 
@@ -219,12 +221,31 @@ useEffect(() => {
 
 
 
-    function appendNewChat(messageData, flag){
+    async function appendNewChat(messageData, flag){
         
         let body = {}
         if(flag){
 
-            body = {
+            if(file){
+                let buffer = await file.arrayBuffer();
+                console.log("file in append", file);
+                console.log("file upload detected");
+                body = {
+                    
+                    from : props.username,
+                    message : messageData,
+                    groupid : props.groupid,
+                    type : "image",
+                    mimeType : file.type,
+                    body : Buffer(buffer).toString('base64'),
+                    timestamp : moment()._d.toLocaleString(),
+                    
+                }
+                props.socket.emit("image", JSON.stringify(body));
+            }
+
+            else if(flag && !file){
+                body = {
                 // id:"id",
                 from : props.username,
                 message : messageData,
@@ -232,13 +253,16 @@ useEffect(() => {
                 timestamp : moment()._d.toLocaleString(),
                 // status : "0"
             }
-            saveConversationToDb(body);
             props.socket.emit("new-chat-from-client", JSON.stringify(body));
-        }else{ 
+            // saveConversationToDb(body);
+            
+        }
+    }else{ 
             body = messageData;
         }
         
         setChatsArray((prev)=>[...prev, body]);
+        setFile(null);
         setMessageInput("");
     }
 
@@ -250,13 +274,14 @@ useEffect(() => {
         setMessageInput(e.target.value);
     }
 
-    useEffect(()=>{
-        props.socket.emit("image", {image:true, buffer:file});
-    }, [file])
+    // useEffect(()=>{
+    //     props.socket.emit("image", {image:true, buffer:file});
+    // }, [file])
 
     function fileChange(e){
         setFile(e.target.files[0])
-        
+        // setFileName(e.target.files[0].name)
+        // setTimeout(()=>{setFileName("")}, 1000)
     }
 
 
@@ -287,7 +312,7 @@ useEffect(() => {
     return (
         <div className={styles.container}>
             <nav className={styles.navbar}>
-                <img src={`data:image/png;base64,${image}`} alt=""/>
+                {/* <img src={`data:image/png;base64,${image}`} alt=""/> */}
                 <div className={styles.profilename}>
                 <img src={"http://127.0.0.1:8000/"+props.groupprofile}/>
                 <h2 className={styles["heading-2-unread"]}>{props.groupname}</h2>
@@ -309,16 +334,16 @@ useEffect(() => {
                         chatsArray.map((value)=>{
                             if(value.from !== props.username){
                                 
-                            return <li><ChatBubble from={value.from} sender={false} message={value.message} time={value.timestamp}/></li>
+                            return <li><ChatBubble socket={props.socket} from={value.from} type={value.type} image={value.body} mimeType={value.mimeType} sender={false} message={value.message} time={value.timestamp}/></li>
                             }
-                            return <li><ChatBubble from={value.from} sender={true} message={value.message} time={value.timestamp}/></li>
+                            return <li><ChatBubble socket={props.socket} from={value.from} type={value.type} image={value.body} mimeType={value.mimeType} sender={true} message={value.message} time={value.timestamp}/></li>
                         })
                     }
                 </ul>
                 </InfiniteScroll>
             </div>
             <div className={styles.messageInputDiv}>
-                <input type="file" onChange={fileChange}></input>
+                <input className={styles.imageButton} value={fileName} type="file" onChange={fileChange}/>
                 <input onKeyUp={onKeyUpHandler} onChange={changeInputVal} value={messageInput} className={styles.messageInput} placeholder="Type a message"></input>
             </div>
         </div>
